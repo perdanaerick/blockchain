@@ -33,15 +33,12 @@ contract Auction {
     function start() external {
         require(!started, "AUCTION STARTED");
         require(msg.sender == seller, "NOT SELLER");
-        nft.transferFrom(msg.sender, address(this), nftId);
         started = true;
-        endAt = block.timestamp + 120;
         emit Start();
     }
 
     function bid() external payable {
         require(started, "AUCTION NOT STARTED");
-        require(block.timestamp < endAt, "AUCTION ENDED");
         require(msg.value > highestBid, "VALUE < HIGHEST");
 
         if(highestBidder != address(0)) {
@@ -55,6 +52,7 @@ contract Auction {
     }
 
     function withdraw() external {
+        require(ended, "AUCTION NOT ENDED");
         uint bal = bids[msg.sender];
         bids[msg.sender] = 0;
         payable(msg.sender).transfer(bal);
@@ -63,17 +61,16 @@ contract Auction {
 
     function end() external {
         require(started, "AUCTION NOT STARTED");
-        //require(block.timestamp >= endAt, "AUCTION NOT ENDED");
         require(msg.sender == seller, "NOT SELLER");
         require(!ended, "AUCTION ENDED");
 
         ended = true;
         if(highestBidder != address(0)) {
-            nft.safeTransferFrom(address(this), highestBidder, nftId);
+            nft.safeTransferFrom(seller, highestBidder, nftId);
             seller.transfer(highestBid);
-        } else {
-            nft.safeTransferFrom(address(this), seller, nftId);
         }
+
+        
 
         emit End(highestBidder, highestBid);
     }
