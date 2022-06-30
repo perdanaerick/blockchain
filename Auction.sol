@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0
 
 pragma solidity ^0.8.0;
-
 interface IERC721 {
     function safeTransferFrom(address from, address to, uint tokenId) external;
     function transferFrom(address, address, uint) external;
@@ -53,6 +52,7 @@ contract Auction {
 
     function withdraw() external {
         require(ended, "AUCTION NOT ENDED");
+        require(msg.sender != highestBidder, "YOU ARE THE WINNER OF AUCTION, CANNOT WITHDRAW");
         uint bal = bids[msg.sender];
         bids[msg.sender] = 0;
         payable(msg.sender).transfer(bal);
