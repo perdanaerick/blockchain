@@ -41,7 +41,7 @@ contract Auction {
         require(msg.value > highestBid, "VALUE < HIGHEST");
 
         if(highestBidder != address(0)) {
-            bids[highestBidder] += highestBid;
+            bids[highestBidder] = highestBid;
         }
 
         highestBidder = msg.sender;
